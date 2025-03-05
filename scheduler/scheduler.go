@@ -4,9 +4,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/loanApi/config"
-	"github.com/loanApi/models"
-	"github.com/loanApi/queries"
+	"github.com/candrap89/loanApi/config"
+	"github.com/candrap89/loanApi/models"
+	"github.com/candrap89/loanApi/queries"
 )
 
 type Scheduler struct {
