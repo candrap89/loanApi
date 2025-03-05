@@ -10,7 +10,6 @@ import (
 	"github.com/candrap89/loanApi/handlers"
 	"github.com/candrap89/loanApi/queries"
 	"github.com/candrap89/loanApi/scheduler"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
