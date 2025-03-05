@@ -3,7 +3,7 @@ package queries
 import (
 	"database/sql"
 
-	"github.com/loanApi/models"
+	"github.com/candrap89/loanApi/models"
 )
 
 type UserLoanQuery struct {
