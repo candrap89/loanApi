@@ -10,4 +10,5 @@ type UserLoan struct {
 	LastUpdatedAt   time.Time `json:"last_updated_at"`
 	LoanOutstanding float64   `json:"loan_outstanding"`
 	Interest        float64   `json:"interest"`
+	IsDelinquent    bool      `json:"is_delinquent"`
 }

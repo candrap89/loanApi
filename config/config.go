@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -25,13 +26,16 @@ type Config struct {
 func LoadConfig(filename string) (*Config, error) {
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read file: %v", err)
 	}
+
+	// Debug: Print the file content
+	fmt.Println("File content:", string(file))
 
 	var config Config
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse JSON: %v", err)
 	}
 
 	return &config, nil

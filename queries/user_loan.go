@@ -29,7 +29,9 @@ func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) 
 
 	var userLoans []models.UserLoan
 	for rows.Next() {
+
 		var userLoan models.UserLoan
+
 		err := rows.Scan(
 			&userLoan.ID,
 			&userLoan.UserCIF,
@@ -42,6 +44,7 @@ func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) 
 		if err != nil {
 			return nil, err
 		}
+
 		userLoans = append(userLoans, userLoan)
 	}
 
@@ -79,4 +82,28 @@ func (q *UserLoanQuery) GetAllUsers() ([]models.UserLoan, error) {
 	}
 
 	return userLoans, nil
+}
+
+// UpdateLoanOutstanding updates the loan_outstanding for a user
+func (q *UserLoanQuery) UpdateUserLoanOutstanding(userID int, newOutstanding float64) error {
+	query := `
+		UPDATE user_loan
+		SET loan_outstanding = ?
+		WHERE id = ?
+	`
+
+	_, err := q.DB.Exec(query, newOutstanding, userID)
+	return err
+}
+
+// Update user loan To deliquent updates the loan_outstanding for a user
+func (q *UserLoanQuery) UpdateUserTodeliquent(IsDelinquent bool, user_id int) error {
+	query := `
+		UPDATE user_loan
+		SET IsDelinquent = ?
+		WHERE id = ?
+	`
+
+	_, err := q.DB.Exec(query, IsDelinquent, user_id)
+	return err
 }

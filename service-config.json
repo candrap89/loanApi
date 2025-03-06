@@ -1,0 +1,12 @@
+{
+    "database": {
+      "host": "localhost",
+      "user": "root",
+      "password": "",
+      "database": "amartha_billing"
+    },
+    "scheduler": {
+      "interval": "day",
+      "time": "11:00"
+    }
+  }

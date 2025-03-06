@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -10,92 +11,122 @@ import (
 )
 
 type Scheduler struct {
-	Config        *config.Config
 	BillingQuery  *queries.BillingQuery
-	UserLoanQuery *queries.UserLoanQuery // Add UserLoanQuery to fetch users
+	UserLoanQuery *queries.UserLoanQuery // Add UserLoanQuery
+	Config        *config.Config
 }
 
-func NewScheduler(cfg *config.Config, billingQuery *queries.BillingQuery, userLoanQuery *queries.UserLoanQuery) *Scheduler {
+func NewScheduler(billingQuery *queries.BillingQuery, userLoanQuery *queries.UserLoanQuery, cfg *config.Config) *Scheduler {
 	return &Scheduler{
-		Config:        cfg,
 		BillingQuery:  billingQuery,
 		UserLoanQuery: userLoanQuery,
+		Config:        cfg,
 	}
 }
 
+// the logic for generating and inserting billing records
+func (s *Scheduler) RunJob() error {
+	log.Println("Running scheduler job...")
+
+	// Fetch all deliquent users
+	deliquentUsers, err := s.BillingQuery.GetDeliquentUsers() // Use UserLoanQuery
+	if err != nil {
+		return fmt.Errorf("failed to fetch deliquent user: %v", err)
+	}
+
+	// Fetch all users from the user_loan table
+	users, err := s.UserLoanQuery.GetAllUsers() // Use UserLoanQuery
+	if err != nil {
+		return fmt.Errorf("failed to fetch users: %v", err)
+	}
+
+	for _, user := range users {
+		// Fetch the latest week value for the user
+		week, err := s.BillingQuery.GetLatestWeek(user.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get latest week for user %d: %v", user.ID, err)
+		}
+		isDeliquent := contains(deliquentUsers, user.ID)
+		billAmount := (user.Loan + (user.Loan * (user.Interest / 100))) / 50
+		billing := models.Billing{
+			IDUser:          user.ID,
+			BillAmount:      billAmount,
+			PaidStatus:      false,
+			LastUpdatedAt:   time.Now(),
+			LoanOutstanding: user.LoanOutstanding,
+			Week:            week,
+		}
+
+		// Update the user to deliquent if they have outstanding loan
+		err = s.UserLoanQuery.UpdateUserTodeliquent(isDeliquent, user.ID)
+		if err != nil {
+			return fmt.Errorf("failed to fetch users: %v", err)
+		}
+
+		// Insert the billing record into the database
+		err = s.BillingQuery.InsertBilling(billing)
+		if err != nil {
+			return fmt.Errorf("failed to insert billing record for user %d: %v", user.ID, err)
+		}
+	}
+
+	log.Println("Job completed successfully")
+	return nil
+}
+
+func contains(deliquentUsers []int, i int) bool {
+	for _, id := range deliquentUsers {
+		if id == i {
+			return true
+		}
+	}
+	return false
+}
+
+// Start starts the scheduler
 func (s *Scheduler) Start() {
 	go func() {
 		for {
-			s.runTask()
+			if err := s.RunJob(); err != nil {
+				log.Printf("Error running job: %v", err)
+			}
 			s.sleepUntilNextRun()
 		}
 	}()
 }
 
-func (s *Scheduler) runTask() {
-	log.Println("Running scheduler task...")
-
-	// Fetch all users from the user_loan table
-	users, err := s.UserLoanQuery.GetAllUsers()
-	if err != nil {
-		log.Printf("Failed to fetch users: %v", err)
-		return
-	}
-
-	// Generate billing records for each user
-	for _, user := range users {
-		billing := models.Billing{
-			IDUser:          user.ID,
-			BillAmount:      user.Loan * (user.Interest / 100), // Example: Bill amount = loan * interest rate
-			PaidStatus:      false,
-			LastUpdatedAt:   time.Now(),
-			LoanOutstanding: user.LoanOutstanding,
-			Week:            int(time.Now().Weekday()),
-		}
-
-		// Insert the billing record into the database
-		err := s.BillingQuery.InsertBilling(billing)
-		if err != nil {
-			log.Printf("Failed to insert billing record for user %d: %v", user.ID, err)
-		} else {
-			log.Printf("Billing record inserted successfully for user %d", user.ID)
-		}
-	}
-}
-
+// sleepUntilNextRun calculates the duration until the next scheduled run based on the config
 func (s *Scheduler) sleepUntilNextRun() {
-	interval := s.Config.Scheduler.Interval
-	nextRun := time.Now()
+	now := time.Now()
+	var nextRun time.Time
 
-	switch interval {
-	case "minute":
-		nextRun = nextRun.Add(time.Minute)
-	case "hour":
-		nextRun = nextRun.Add(time.Hour)
-	case "day":
-		nextRun = nextRun.AddDate(0, 0, 1)
-	case "week":
-		nextRun = nextRun.AddDate(0, 0, 7)
-	default:
-		log.Fatalf("Invalid scheduler interval: %s", interval)
+	// Parse the scheduled time from the config
+	scheduledTime, err := time.Parse("15:04", s.Config.Scheduler.Time)
+	if err != nil {
+		log.Fatalf("Failed to parse scheduler time: %v", err)
 	}
 
-	if s.Config.Scheduler.Time != "" {
-		// Parse the specific time for daily/weekly schedules
-		layout := "15:04"
-		scheduledTime, err := time.Parse(layout, s.Config.Scheduler.Time)
-		if err != nil {
-			log.Fatalf("Failed to parse scheduler time: %v", err)
+	switch s.Config.Scheduler.Interval {
+	case "minute":
+		// Run every minute
+		nextRun = now.Add(time.Minute)
+	case "hour":
+		// Run every hour
+		nextRun = now.Add(time.Hour)
+	case "day":
+		// Run daily at the specified time
+		nextRun = time.Date(now.Year(), now.Month(), now.Day(), scheduledTime.Hour(), scheduledTime.Minute(), 0, 0, now.Location())
+		if now.After(nextRun) {
+			nextRun = nextRun.AddDate(0, 0, 1) // Move to the next day if the time has already passed
 		}
-
-		nextRun = time.Date(
-			nextRun.Year(),
-			nextRun.Month(),
-			nextRun.Day(),
-			scheduledTime.Hour(),
-			scheduledTime.Minute(),
-			0, 0, nextRun.Location(),
-		)
+	case "week":
+		// Run weekly at the specified time
+		nextRun = time.Date(now.Year(), now.Month(), now.Day(), scheduledTime.Hour(), scheduledTime.Minute(), 0, 0, now.Location())
+		if now.After(nextRun) {
+			nextRun = nextRun.AddDate(0, 0, 7) // Move to the next week if the time has already passed
+		}
+	default:
+		log.Fatalf("Invalid scheduler interval: %s", s.Config.Scheduler.Interval)
 	}
 
 	sleepDuration := time.Until(nextRun)
