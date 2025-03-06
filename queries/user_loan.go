@@ -110,7 +110,7 @@ func (q *UserLoanQuery) UpdateUserTodeliquent(IsDelinquent bool, user_id int) er
 
 func (q *UserLoanQuery) GetDelinquentUsers() ([]models.UserLoan, error) {
 	query := `
-		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest
+		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest, isDelinquent
 		FROM user_loan where IsDelinquent = true
 	`
 
@@ -131,6 +131,7 @@ func (q *UserLoanQuery) GetDelinquentUsers() ([]models.UserLoan, error) {
 			&userLoan.LastUpdatedAt,
 			&userLoan.LoanOutstanding,
 			&userLoan.Interest,
+			&userLoan.IsDelinquent,
 		)
 		if err != nil {
 			return nil, err

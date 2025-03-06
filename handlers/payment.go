@@ -11,12 +11,12 @@ import (
 )
 
 type PaymentHandler struct {
-	BillingQuery     *queries.BillingQuery
-	UserLoanQuery    *queries.UserLoanQuery
-	TransactionQuery *queries.TransactionQuery
+	BillingQuery     queries.BillingQueryInterface
+	UserLoanQuery    queries.UserLoanQueryInterface
+	TransactionQuery queries.TransactionQueryInterface
 }
 
-func NewPaymentHandler(billingQuery *queries.BillingQuery, userLoanQuery *queries.UserLoanQuery, transactionQuery *queries.TransactionQuery) *PaymentHandler {
+func NewPaymentHandler(billingQuery queries.BillingQueryInterface, userLoanQuery queries.UserLoanQueryInterface, transactionQuery queries.TransactionQueryInterface) *PaymentHandler {
 	return &PaymentHandler{
 		BillingQuery:     billingQuery,
 		UserLoanQuery:    userLoanQuery,
