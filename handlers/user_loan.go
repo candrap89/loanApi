@@ -35,4 +35,22 @@ func (h *UserLoanHandler) GetUserLoanByCIF(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userLoans)
+
+}
+
+func (h *UserLoanHandler) GetDelinquentUsers(w http.ResponseWriter, r *http.Request) {
+	userLoans, err := h.UserLoanQuery.GetDelinquentUsers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(userLoans) == 0 {
+		http.Error(w, "Deliquent User loan data not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(userLoans)
+
 }

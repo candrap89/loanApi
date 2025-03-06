@@ -44,6 +44,7 @@ func main() {
 
 	// Define routes
 	http.HandleFunc("/user-outstanding", userLoanHandler.GetUserLoanByCIF)
+	http.HandleFunc("/delinquents", userLoanHandler.GetDelinquentUsers)
 	http.HandleFunc("/trigger-job", schedulerHandler.TriggerJob)
 	http.HandleFunc("/payment", paymentHandler.MakePayment)
 

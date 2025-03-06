@@ -107,3 +107,36 @@ func (q *UserLoanQuery) UpdateUserTodeliquent(IsDelinquent bool, user_id int) er
 	_, err := q.DB.Exec(query, IsDelinquent, user_id)
 	return err
 }
+
+func (q *UserLoanQuery) GetDelinquentUsers() ([]models.UserLoan, error) {
+	query := `
+		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest
+		FROM user_loan where IsDelinquent = true
+	`
+
+	rows, err := q.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var userLoans []models.UserLoan
+	for rows.Next() {
+		var userLoan models.UserLoan
+		err := rows.Scan(
+			&userLoan.ID,
+			&userLoan.UserCIF,
+			&userLoan.Loan,
+			&userLoan.Status,
+			&userLoan.LastUpdatedAt,
+			&userLoan.LoanOutstanding,
+			&userLoan.Interest,
+		)
+		if err != nil {
+			return nil, err
+		}
+		userLoans = append(userLoans, userLoan)
+	}
+
+	return userLoans, nil
+}

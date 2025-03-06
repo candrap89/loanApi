@@ -96,6 +96,12 @@ func (h *PaymentHandler) MakePayment(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+	// updaye user to not deliquent
+	err = h.UserLoanQuery.UpdateUserTodeliquent(false, lastbill.IDUser)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to update user record: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	// Insert a transaction record if evrytihng is successful
 	transaction := models.TransactionHistory{

@@ -10,4 +10,5 @@ type Billing struct {
 	LastUpdatedAt   time.Time `json:"last_updated_at"`
 	LoanOutstanding float64   `json:"loan_outstanding"`
 	Week            int       `json:"week"`
+	TotalBillAmount float64   `json:"total_bill_amount"` // Total bill amount for the week
 }

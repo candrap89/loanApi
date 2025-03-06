@@ -17,8 +17,8 @@ func NewBillingQuery(db *sql.DB) *BillingQuery {
 // InsertBilling inserts a new billing record into the database
 func (q *BillingQuery) InsertBilling(billing models.Billing) error {
 	query := `
-		INSERT INTO billing (id_user, bill_amount, paid_status, last_updated_at, loan_outstanding, week)
-		VALUES (?, ?, ?, ?, ?, ?)
+		INSERT INTO billing (id_user, bill_amount, paid_status, last_updated_at, loan_outstanding, week, total_bill_amount)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err := q.DB.Exec(
@@ -29,6 +29,7 @@ func (q *BillingQuery) InsertBilling(billing models.Billing) error {
 		billing.LastUpdatedAt,
 		billing.LoanOutstanding,
 		billing.Week,
+		billing.TotalBillAmount,
 	)
 
 	return err
@@ -64,7 +65,7 @@ func (q *BillingQuery) GetDeliquentUsers() ([]int, error) {
 		FROM billing
 		WHERE paid_status = false
 		GROUP BY id_user
-		HAVING COUNT(id_user) > 1
+		HAVING COUNT(id_user) >= 1
 	`
 
 	rows, err := q.DB.Query(query)
@@ -142,4 +143,21 @@ func (q *BillingQuery) MarkBillAsPaid(billID int) error {
 	`
 	_, err := q.DB.Exec(query, billID)
 	return err
+}
+
+// GetTotalUnpaidBillAmount calculates the total unpaid bill amount for a user
+func (q *BillingQuery) GetTotalUnpaidBillAmount(userID int) (float64, error) {
+	query := `
+		SELECT COALESCE(SUM(bill_amount), 0)
+		FROM billing
+		WHERE id_user = ? AND paid_status = false
+	`
+
+	var totalBillAmount float64
+	err := q.DB.QueryRow(query, userID).Scan(&totalBillAmount)
+	if err != nil {
+		return 0, err
+	}
+
+	return totalBillAmount, nil
 }

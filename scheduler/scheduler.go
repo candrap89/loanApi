@@ -41,13 +41,22 @@ func (s *Scheduler) RunJob() error {
 	}
 
 	for _, user := range users {
+		billAmount := (user.Loan + (user.Loan * (user.Interest / 100))) / 50
+
+		// Calculate the total bill amount (sum of all unpaid bills for the user)
+		totalBillAmount, err := s.BillingQuery.GetTotalUnpaidBillAmount(user.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get total unpaid bill amount for user %d: %v", user.ID, err)
+		}
+		totalBillAmount += billAmount // Add the current bill amount to the total
+
 		// Fetch the latest week value for the user
 		week, err := s.BillingQuery.GetLatestWeek(user.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get latest week for user %d: %v", user.ID, err)
 		}
 		isDeliquent := contains(deliquentUsers, user.ID)
-		billAmount := (user.Loan + (user.Loan * (user.Interest / 100))) / 50
+
 		billing := models.Billing{
 			IDUser:          user.ID,
 			BillAmount:      billAmount,
@@ -55,6 +64,7 @@ func (s *Scheduler) RunJob() error {
 			LastUpdatedAt:   time.Now(),
 			LoanOutstanding: user.LoanOutstanding,
 			Week:            week,
+			TotalBillAmount: totalBillAmount,
 		}
 
 		// Update the user to deliquent if they have outstanding loan
