@@ -5,8 +5,8 @@
 please follow this document to install on local.  
 https://docs.google.com/document/d/1g-NkxJF3ev6TE9ovG0zzw_gmwoL4NYL3CEpjBcXlVwM/edit?usp=sharing 
 
-**Service Description**
-Billing engine provide an API to make payment and get detail user loan outstanding. This service has scheduler that run in goroutine , to update billing statement
+**Service Description**  
+Billing engine provide an API to make payment and get detail user loan outstanding. This service has scheduler that run in goroutine to update billing statement
 
 **API Spec**  
 *Detail loan*  ( to get detail loan by cifnumber )
