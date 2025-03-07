@@ -2,7 +2,7 @@
 
 
 **Initial setup**  
-please follow this document to install on local. 
+please follow this document to install on local.  
 https://docs.google.com/document/d/1g-NkxJF3ev6TE9ovG0zzw_gmwoL4NYL3CEpjBcXlVwM/edit?usp=sharing 
 
 **Service Description**
