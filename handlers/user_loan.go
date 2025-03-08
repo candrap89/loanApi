@@ -8,10 +8,10 @@ import (
 )
 
 type UserLoanHandler struct {
-	UserLoanQuery *queries.UserLoanQuery
+	UserLoanQuery queries.UserLoanQueryInterface // Use the interface
 }
 
-func NewUserLoanHandler(userLoanQuery *queries.UserLoanQuery) *UserLoanHandler {
+func NewUserLoanHandler(userLoanQuery queries.UserLoanQueryInterface) *UserLoanHandler {
 	return &UserLoanHandler{UserLoanQuery: userLoanQuery}
 }
 

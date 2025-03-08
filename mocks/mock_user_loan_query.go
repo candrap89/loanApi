@@ -3,6 +3,7 @@ package mocks
 import (
 	reflect "reflect"
 
+	models "github.com/candrap89/loanApi/models"
 	"github.com/golang/mock/gomock"
 )
 
@@ -55,4 +56,36 @@ func (m *MockUserLoanQuery) UpdateUserTodeliquent(status bool, userId int) error
 func (mr *MockUserLoanQueryMockRecorder) UpdateUserTodeliquent(status, userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserTodeliquent", reflect.TypeOf((*MockUserLoanQuery)(nil).UpdateUserTodeliquent), status, userId)
+}
+
+// Add these methods to the MockUserLoanQuery struct in the mock file
+
+// GetUserLoanByCIF mocks base method
+func (m *MockUserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserLoanByCIF", cif)
+	ret0, _ := ret[0].([]models.UserLoan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserLoanByCIF indicates an expected call of GetUserLoanByCIF
+func (mr *MockUserLoanQueryMockRecorder) GetUserLoanByCIF(cif interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserLoanByCIF", reflect.TypeOf((*MockUserLoanQuery)(nil).GetUserLoanByCIF), cif)
+}
+
+// GetDelinquentUsers mocks base method
+func (m *MockUserLoanQuery) GetDelinquentUsers() ([]models.UserLoan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDelinquentUsers")
+	ret0, _ := ret[0].([]models.UserLoan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDelinquentUsers indicates an expected call of GetDelinquentUsers
+func (mr *MockUserLoanQueryMockRecorder) GetDelinquentUsers() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDelinquentUsers", reflect.TypeOf((*MockUserLoanQuery)(nil).GetDelinquentUsers))
 }
