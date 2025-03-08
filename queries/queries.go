@@ -13,6 +13,8 @@ type BillingQueryInterface interface {
 type UserLoanQueryInterface interface {
 	UpdateUserLoanOutstanding(userID int, newOutstanding float64) error
 	UpdateUserTodeliquent(status bool, userID int) error
+	GetDelinquentUsers() ([]models.UserLoan, error)
+	GetUserLoanByCIF(cif string) ([]models.UserLoan, error)
 }
 
 // TransactionQueryInterface defines the methods for TransactionQuery
