@@ -16,7 +16,7 @@ func NewUserLoanQuery(db *sql.DB) *UserLoanQuery {
 
 func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) {
 	query := `
-		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest
+		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest, isDelinquent
 		FROM user_loan
 		WHERE user_cif = ?
 	`
@@ -40,6 +40,7 @@ func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) 
 			&userLoan.LastUpdatedAt,
 			&userLoan.LoanOutstanding,
 			&userLoan.Interest,
+			&userLoan.IsDelinquent,
 		)
 		if err != nil {
 			return nil, err
@@ -53,7 +54,7 @@ func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) 
 
 func (q *UserLoanQuery) GetAllUsers() ([]models.UserLoan, error) {
 	query := `
-		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest
+		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest, isDelinquent
 		FROM user_loan
 	`
 
@@ -74,6 +75,7 @@ func (q *UserLoanQuery) GetAllUsers() ([]models.UserLoan, error) {
 			&userLoan.LastUpdatedAt,
 			&userLoan.LoanOutstanding,
 			&userLoan.Interest,
+			&userLoan.IsDelinquent,
 		)
 		if err != nil {
 			return nil, err
