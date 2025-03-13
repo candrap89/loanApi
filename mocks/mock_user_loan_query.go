@@ -58,7 +58,19 @@ func (mr *MockUserLoanQueryMockRecorder) UpdateUserTodeliquent(status, userId in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserTodeliquent", reflect.TypeOf((*MockUserLoanQuery)(nil).UpdateUserTodeliquent), status, userId)
 }
 
-// Add these methods to the MockUserLoanQuery struct in the mock file
+// CreateUserLoan mocks base method.
+func (m *MockUserLoanQuery) CreateUserLoan(userLoan models.UserLoan) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserLoan", userLoan)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUserLoan indicates an expected call of CreateUserLoan.
+func (mr *MockBillingQueryMockRecorder) CreateUserLoan(userLoan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserLoan", reflect.TypeOf((*MockUserLoanQuery)(nil).CreateUserLoan), userLoan)
+}
 
 // GetUserLoanByCIF mocks base method
 func (m *MockUserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) {

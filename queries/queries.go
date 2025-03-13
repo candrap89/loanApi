@@ -15,6 +15,7 @@ type UserLoanQueryInterface interface {
 	UpdateUserTodeliquent(status bool, userID int) error
 	GetDelinquentUsers() ([]models.UserLoan, error)
 	GetUserLoanByCIF(cif string) ([]models.UserLoan, error)
+	CreateUserLoan(userLoan models.UserLoan) error
 }
 
 // TransactionQueryInterface defines the methods for TransactionQuery

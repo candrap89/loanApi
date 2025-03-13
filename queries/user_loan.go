@@ -14,6 +14,26 @@ func NewUserLoanQuery(db *sql.DB) *UserLoanQuery {
 	return &UserLoanQuery{DB: db}
 }
 
+// InsertBilling inserts a new billing record into the database
+func (q *UserLoanQuery) CreateUserLoan(userLoan models.UserLoan) error {
+	query := `
+		INSERT INTO user_loan (user_cif, loan, status, loan_outstanding, interest, isDelinquent)
+		VALUES (?, ?, ?, ?, ?, ?)
+	`
+
+	_, err := q.DB.Exec(
+		query,
+		userLoan.UserCIF,
+		userLoan.Loan,
+		userLoan.Status,
+		userLoan.LoanOutstanding,
+		userLoan.Interest,
+		userLoan.IsDelinquent,
+	)
+
+	return err
+}
+
 func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) {
 	query := `
 		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest, isDelinquent

@@ -8,6 +8,7 @@ import (
 
 	"github.com/candrap89/loanApi/config"
 	"github.com/candrap89/loanApi/handlers"
+	"github.com/candrap89/loanApi/kafka"
 	"github.com/candrap89/loanApi/queries"
 	"github.com/candrap89/loanApi/scheduler"
 	_ "github.com/go-sql-driver/mysql"
@@ -47,6 +48,10 @@ func main() {
 	http.HandleFunc("/delinquents", userLoanHandler.GetDelinquentUsers)
 	http.HandleFunc("/trigger-job", schedulerHandler.TriggerJob)
 	http.HandleFunc("/payment", paymentHandler.MakePayment)
+	http.HandleFunc("/user-loan", userLoanHandler.CreateUserLoan)
+
+	// Start Kafka consumers
+	go kafka.StartNewProductConsumer()
 
 	// Start the server
 	log.Println("Server is running on http://localhost:8080")
