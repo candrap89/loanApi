@@ -49,6 +49,7 @@ func main() {
 	http.HandleFunc("/trigger-job", schedulerHandler.TriggerJob)
 	http.HandleFunc("/payment", paymentHandler.MakePayment)
 	http.HandleFunc("/user-loan", userLoanHandler.CreateUserLoan)
+	http.HandleFunc("/user-vote", handlers.GetVoteCountHandler)
 
 	// Start Kafka consumers
 	go kafka.StartNewProductConsumer()
