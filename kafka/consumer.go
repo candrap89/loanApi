@@ -11,15 +11,18 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// define globa variables for this file
 var (
 	ackReceived = make(map[string]bool)
 	ackMutex    = &sync.Mutex{}
 )
 
+// class properties
 type consumerHandler struct {
 	UserLoanQuery queries.UserLoanQueryInterface // Use the interface
 }
 
+// NewConsumerHandler function to creates a new consumer handler with the given UserLoanQueryInterface
 func NewConsumerHandler(userLoanQuery queries.UserLoanQueryInterface) *consumerHandler {
 	return &consumerHandler{UserLoanQuery: userLoanQuery}
 }
