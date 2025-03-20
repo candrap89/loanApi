@@ -52,7 +52,9 @@ func main() {
 	http.HandleFunc("/user-vote", handlers.GetVoteCountHandler)
 
 	// Start Kafka consumers
-	go kafka.StartNewProductConsumer()
+	// object initialization
+	consumer := kafka.NewConsumerHandler(userLoanQuery) // Uncomment this line if the function is defined in the kafka package
+	go consumer.StartNewProductConsumer()
 
 	// Start the server
 	log.Println("Server is running on http://localhost:8080")

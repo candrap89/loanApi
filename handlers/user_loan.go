@@ -54,10 +54,10 @@ func (h *UserLoanHandler) CreateUserLoan(w http.ResponseWriter, r *http.Request)
 	kafka.SendNewProductMessage(userLoan.UserCIF)
 
 	// Wait for ACK from the consumer
-	if !kafka.WaitForAck(userLoan.UserCIF) {
-		http.Error(w, "Timeout waiting for ACK", http.StatusInternalServerError)
-		return
-	}
+	// if !kafka.WaitForAck(userLoan.UserCIF) {
+	// 	http.Error(w, "Timeout waiting for ACK", http.StatusInternalServerError)
+	// 	return
+	// }
 
 	// Return success response
 	w.Header().Set("Content-Type", "application/json")

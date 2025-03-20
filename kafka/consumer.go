@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/candrap89/loanApi/models"
+	"github.com/candrap89/loanApi/queries"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -14,7 +16,15 @@ var (
 	ackMutex    = &sync.Mutex{}
 )
 
-func StartNewProductConsumer() {
+type consumerHandler struct {
+	UserLoanQuery queries.UserLoanQueryInterface // Use the interface
+}
+
+func NewConsumerHandler(userLoanQuery queries.UserLoanQueryInterface) *consumerHandler {
+	return &consumerHandler{UserLoanQuery: userLoanQuery}
+}
+
+func (ch *consumerHandler) StartNewProductConsumer() {
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  []string{"localhost:9092"},
 		Topic:    "new-products-ack",
@@ -33,6 +43,19 @@ func StartNewProductConsumer() {
 		json.Unmarshal(m.Value, &ack)
 
 		userCif := ack["cifId"]
+		userLoan := models.UserLoan{
+			UserCIF:         userCif,
+			Loan:            5000000,
+			Status:          true,
+			LoanOutstanding: 5000000,
+			IsDelinquent:    true,
+		}
+
+		err = ch.UserLoanQuery.CreateUserLoan(userLoan)
+		if err != nil {
+			fmt.Printf("Failed to insert User loan record: %v\n", err)
+			return
+		}
 		ackMutex.Lock()
 		ackReceived[userCif] = true
 		ackMutex.Unlock()
