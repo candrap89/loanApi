@@ -21,6 +21,7 @@ type SchedulerConfig struct {
 type Config struct {
 	Database  DatabaseConfig  `json:"database"`
 	Scheduler SchedulerConfig `json:"scheduler"`
+	ApiKey    string          `json:"api_key"`
 }
 
 func LoadConfig(filename string) (*Config, error) {
