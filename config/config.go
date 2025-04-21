@@ -21,7 +21,27 @@ type SchedulerConfig struct {
 type Config struct {
 	Database  DatabaseConfig  `json:"database"`
 	Scheduler SchedulerConfig `json:"scheduler"`
-	ApiKey    string          `json:"api_key"`
+	APIKey    APIKeyConfig    `json:"api_keys"`
+	RateLimit RateLimitConfig `json:"rate_limits"`
+	Redis     Redis           `json:"redis"`
+}
+
+type RateLimitConfig struct {
+	Delinguents int `json:"delinguents"`
+	Outstanding int `json:"outstanding"`
+	Payment     int `json:"payment"`
+}
+
+type APIKeyConfig struct {
+	DelinguentsKey string `json:"delinguents_key"`
+	OutstandingKey string `json:"outstanding_key"`
+	PaymentKey     string `json:"payment_key"`
+}
+
+type Redis struct {
+	Host     []string `json:"host"`
+	Password string   `json:"Password"`
+	DB       int      `json:"Db"`
 }
 
 func LoadConfig(filename string) (*Config, error) {

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -54,10 +55,10 @@ func (h *UserLoanHandler) CreateUserLoan(w http.ResponseWriter, r *http.Request)
 	kafka.SendNewProductMessage(userLoan.UserCIF)
 
 	// Wait for ACK from the consumer
-	// if !kafka.WaitForAck(userLoan.UserCIF) {
-	// 	http.Error(w, "Timeout waiting for ACK", http.StatusInternalServerError)
-	// 	return
-	// }
+	if !kafka.WaitForAck(userLoan.UserCIF) {
+		http.Error(w, "Timeout waiting for ACK", http.StatusInternalServerError)
+		return
+	}
 
 	// Return success response
 	w.Header().Set("Content-Type", "application/json")
@@ -83,6 +84,11 @@ func (h *UserLoanHandler) GetUserLoanByCIF(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "User loan data not found", http.StatusNotFound)
 		return
 	}
+	fmt.Println("User loans:", userLoans)
+	ctx := r.Context()
+	fmt.Println("User loan data found in context:", ctx.Value("user_loan_data"))
+
+	ctx = context.WithValue(ctx, "user_loan_data :", userLoans)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userLoans)
