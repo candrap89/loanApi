@@ -100,6 +100,6 @@ func main() {
 	})
 
 	// Start the server
-	log.Println("Server is running on http://localhost:8081")
-	log.Fatal(http.ListenAndServe(":8081", router))
+	log.Println("Server is running on http://localhost:8082")
+	log.Fatal(http.ListenAndServe(":8082", router))
 }

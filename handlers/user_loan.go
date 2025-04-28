@@ -51,14 +51,21 @@ func (h *UserLoanHandler) CreateUserLoan(w http.ResponseWriter, r *http.Request)
 		Message: "User Loan created successfully",
 	}
 
-	// Send a Kafka message to notify other departments
-	kafka.SendNewProductMessage(userLoan.UserCIF)
+	fmt.Println("before send to kafka")
 
-	// Wait for ACK from the consumer
-	if !kafka.WaitForAck(userLoan.UserCIF) {
-		http.Error(w, "Timeout waiting for ACK", http.StatusInternalServerError)
+	// Send a Kafka message to notify other departments
+	kafkaProducer := kafka.NewProductMessage(h.UserLoanQuery)
+	err = kafkaProducer.SendNewProductMessage(userLoan.UserCIF)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to send Kafka message: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	// Wait for ACK from the consumer
+	// if !kafka.WaitForAck(userLoan.UserCIF) {
+	// 	http.Error(w, "Timeout waiting for ACK", http.StatusInternalServerError)
+	// 	return
+	// }
 
 	// Return success response
 	w.Header().Set("Content-Type", "application/json")
