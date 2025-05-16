@@ -18,7 +18,7 @@ func NewTransactionQuery(db *sql.DB) *TransactionQuery {
 func (q *TransactionQuery) InsertTransaction(transaction models.TransactionHistory) error {
 	query := `
 		INSERT INTO transaction_history (bill_id, amount, created_at)
-		VALUES (?, ?, ?)
+		VALUES ($1, $2, $3)
 	`
 
 	_, err := q.DB.Exec(

@@ -18,7 +18,7 @@ func NewBillingQuery(db *sql.DB) *BillingQuery {
 func (q *BillingQuery) InsertBilling(billing models.Billing) error {
 	query := `
 		INSERT INTO billing (id_user, bill_amount, paid_status, last_updated_at, loan_outstanding, week, total_bill_amount)
-		VALUES (?, ?, ?, ?, ?, ?, ?)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 	`
 
 	_, err := q.DB.Exec(
@@ -40,7 +40,7 @@ func (q *BillingQuery) GetLatestWeek(userID int) (int, error) {
 	query := `
 		SELECT week
 		FROM billing
-		WHERE id_user = ?
+		WHERE id_user = $1
 		ORDER BY week DESC
 		LIMIT 1
 	`
@@ -92,7 +92,7 @@ func (q *BillingQuery) GetBillingByID(userID int) ([]models.Billing, error) {
 	query := `
 		SELECT id, id_user, bill_amount, paid_status, last_updated_at, loan_outstanding, week
 		FROM billing
-		WHERE id_user = ? AND paid_status = false
+		WHERE id_user = $1 AND paid_status = false
 	`
 
 	rows, err := q.DB.Query(query, userID)
@@ -127,8 +127,8 @@ func (q *BillingQuery) MarkBillAsPaidandUpdateOutstanding(outstanding float64, b
 	query := `
 		UPDATE billing
 		SET paid_status = true,
-		loan_outstanding = ?
-		WHERE id = ?
+		loan_outstanding = $1
+		WHERE id = $2
 	`
 	_, err := q.DB.Exec(query, outstanding, billID)
 	return err
@@ -139,7 +139,7 @@ func (q *BillingQuery) MarkBillAsPaid(billID int) error {
 	query := `
 		UPDATE billing
 		SET paid_status = true
-		WHERE id = ?
+		WHERE id = $1
 	`
 	_, err := q.DB.Exec(query, billID)
 	return err
@@ -150,7 +150,7 @@ func (q *BillingQuery) GetTotalUnpaidBillAmount(userID int) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(bill_amount), 0)
 		FROM billing
-		WHERE id_user = ? AND paid_status = false
+		WHERE id_user = $1 AND paid_status = false
 	`
 
 	var totalBillAmount float64

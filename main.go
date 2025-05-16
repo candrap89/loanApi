@@ -10,7 +10,7 @@ import (
 	"github.com/candrap89/loanApi/handlers"
 	"github.com/candrap89/loanApi/queries"
 	"github.com/candrap89/loanApi/scheduler"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -22,7 +22,15 @@ func main() {
 	log.Println("Config loaded successfully:", cfg)
 
 	// Connect to the database
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", cfg.Database.User, cfg.Database.Password, cfg.Database.Host, cfg.Database.Database))
+	// Connect to the PostgreSQL database
+	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
+		cfg.Database.User,
+		cfg.Database.Password,
+		cfg.Database.Host,
+		cfg.Database.Database,
+	)
+
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

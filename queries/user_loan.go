@@ -18,7 +18,7 @@ func (q *UserLoanQuery) GetUserLoanByCIF(cif string) ([]models.UserLoan, error) 
 	query := `
 		SELECT id, user_cif, loan, status, last_updated_at, loan_outstanding, interest, isDelinquent
 		FROM user_loan
-		WHERE user_cif = ?
+		WHERE user_cif = $1
 	`
 
 	rows, err := q.DB.Query(query, cif)
@@ -90,8 +90,8 @@ func (q *UserLoanQuery) GetAllUsers() ([]models.UserLoan, error) {
 func (q *UserLoanQuery) UpdateUserLoanOutstanding(userID int, newOutstanding float64) error {
 	query := `
 		UPDATE user_loan
-		SET loan_outstanding = ?
-		WHERE id = ?
+		SET loan_outstanding = $1
+		WHERE id = $2
 	`
 
 	_, err := q.DB.Exec(query, newOutstanding, userID)
@@ -102,8 +102,8 @@ func (q *UserLoanQuery) UpdateUserLoanOutstanding(userID int, newOutstanding flo
 func (q *UserLoanQuery) UpdateUserTodeliquent(IsDelinquent bool, user_id int) error {
 	query := `
 		UPDATE user_loan
-		SET IsDelinquent = ?
-		WHERE id = ?
+		SET IsDelinquent = $1
+		WHERE id = $2
 	`
 
 	_, err := q.DB.Exec(query, IsDelinquent, user_id)
