@@ -8,6 +8,8 @@ import (
 
 	"github.com/candrap89/loanApi/config"
 	"github.com/candrap89/loanApi/handlers"
+	"github.com/candrap89/loanApi/kafka"
+	"github.com/candrap89/loanApi/middleware"
 	"github.com/candrap89/loanApi/queries"
 	"github.com/candrap89/loanApi/scheduler"
 	_ "github.com/lib/pq"
@@ -50,13 +52,31 @@ func main() {
 	schedulerHandler := handlers.NewSchedulerHandler(scheduler)
 	paymentHandler := handlers.NewPaymentHandler(billingQuery, userLoanQuery, transactionQuery)
 
+	// Create router and apply middleware to all routes
+	router := http.NewServeMux()
+
+	// Create middleware chain
+	authMiddleware := middleware.APIKeyMiddleware(cfg.ApiKey)
+
 	// Define routes
-	http.HandleFunc("/user-outstanding", userLoanHandler.GetUserLoanByCIF)
-	http.HandleFunc("/delinquents", userLoanHandler.GetDelinquentUsers)
-	http.HandleFunc("/trigger-job", schedulerHandler.TriggerJob)
-	http.HandleFunc("/payment", paymentHandler.MakePayment)
+	router.Handle("/user-outstanding", authMiddleware(http.HandlerFunc(userLoanHandler.GetUserLoanByCIF)))
+	router.Handle("/delinquents", authMiddleware(http.HandlerFunc(userLoanHandler.GetDelinquentUsers)))
+	router.Handle("/trigger-job", authMiddleware(http.HandlerFunc(schedulerHandler.TriggerJob)))
+	router.Handle("/payment", authMiddleware(http.HandlerFunc(paymentHandler.MakePayment)))
+	router.Handle("/user-loan", authMiddleware(http.HandlerFunc(userLoanHandler.CreateUserLoan)))
+	router.Handle("/user-vote", authMiddleware(http.HandlerFunc(handlers.GetVoteCountHandler)))
+
+	// Start Kafka consumers
+	// object initialization
+	consumer := kafka.NewConsumerHandler(userLoanQuery) // Uncomment this line if the function is defined in the kafka package
+	go consumer.StartNewProductConsumer()
+
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
 
 	// Start the server
-	log.Println("Server is running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	log.Println("Server is running on http://localhost:8081")
+	log.Fatal(http.ListenAndServe(":8081", router))
 }

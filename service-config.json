@@ -8,5 +8,6 @@
     "scheduler": {
       "interval": "day",
       "time": "11:00"
-    }
+    },
+    "api_key": "1234567890"
   }
