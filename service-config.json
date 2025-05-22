@@ -9,5 +9,19 @@
       "interval": "day",
       "time": "11:00"
     },
-    "api_key": "1234567890"
+    "api_keys": {
+      "delinguents_key": "key_user_123",
+      "outstanding_key": "key_pay_456",
+      "payment_key": "key_report_789"
+    },
+    "rate_limits": {
+      "delinguents": 2,
+      "outstanding": 2,
+      "payment": 2
+    },
+    "redis": {
+      "host": ["localhost:7000","localhost:7001","localhost:7002"],
+      "password": "",
+      "db": 0
+    }
   }
