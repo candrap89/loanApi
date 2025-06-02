@@ -18,6 +18,12 @@ type RedisClient struct {
 }
 
 func NewRedisClient(cfg RedisConfig) *RedisClient {
+	// return &RedisClient{
+	// 	client: redis.NewClusterClient(&redis.ClusterOptions{
+	// 		Addrs:    cfg.Hosts, // Use all cluster nodes
+	// 		Password: cfg.Password,
+	// 	}),
+	// }
 	return &RedisClient{
 		client: redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    cfg.Hosts, // Use all cluster nodes

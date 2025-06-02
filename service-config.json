@@ -20,7 +20,7 @@
       "payment": 2
     },
     "redis": {
-      "host": ["localhost:7000","localhost:7001","localhost:7002"],
+      "host": ["172.22.53.84:6379"],
       "password": "",
       "db": 0
     }
